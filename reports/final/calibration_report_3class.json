@@ -1,0 +1,54 @@
+{
+  "project_root": "C:\\Users\\ASUS\\Desktop\\UngThuPhoi",
+  "checkpoint": "C:\\Users\\ASUS\\Desktop\\UngThuPhoi\\models\\production\\multimodal_model_3class_distilled_student.pth",
+  "dataset_csv": "C:\\Users\\ASUS\\Desktop\\UngThuPhoi\\dataset\\multimodal_image_dataset_3class_roi.csv",
+  "fit_split": "val",
+  "temperature": 0.6214999556541443,
+  "class_names_by_idx": [
+    "high_malignancy",
+    "low_malignancy",
+    "medium_risk"
+  ],
+  "metrics": {
+    "val": {
+      "before": {
+        "temperature": 1.0,
+        "nll": 0.6449663639068604,
+        "ece": 0.14427836529082722,
+        "brier": 0.40104925632476807,
+        "accuracy": 0.75,
+        "macro_f1": 0.750900900900901,
+        "avg_confidence": 0.6275544762611389
+      },
+      "after": {
+        "temperature": 0.6214999556541443,
+        "nll": 0.6107624173164368,
+        "ece": 0.09129768196079464,
+        "brier": 0.381673663854599,
+        "accuracy": 0.75,
+        "macro_f1": 0.750900900900901,
+        "avg_confidence": 0.7196657657623291
+      }
+    },
+    "test": {
+      "before": {
+        "temperature": 1.0,
+        "nll": 0.5402106046676636,
+        "ece": 0.1874298532803854,
+        "brier": 0.32291021943092346,
+        "accuracy": 0.84,
+        "macro_f1": 0.8395033689151336,
+        "avg_confidence": 0.6638239026069641
+      },
+      "after": {
+        "temperature": 0.6214999556541443,
+        "nll": 0.4773905873298645,
+        "ece": 0.12312093019485473,
+        "brier": 0.28382357954978943,
+        "accuracy": 0.84,
+        "macro_f1": 0.8395033689151336,
+        "avg_confidence": 0.7550312876701355
+      }
+    }
+  }
+}

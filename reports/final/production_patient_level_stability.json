@@ -1,0 +1,101 @@
+{
+  "method": "patient_level_bootstrap_and_repeated_subsample_on_existing_heldout_split",
+  "important_note": "This estimates uncertainty of the current held-out test evaluation. It is not a full unbiased cross-validation retraining study.",
+  "dataset_csv": "multimodal_image_dataset_3class_roi.csv",
+  "checkpoint": "models/production/multimodal_model_3class_distilled_student.pth",
+  "split": "test",
+  "class_names_by_idx": [
+    "high_malignancy",
+    "low_malignancy",
+    "medium_risk"
+  ],
+  "split_counts": {
+    "rows": 75,
+    "patients": 75,
+    "labels": {
+      "high_malignancy": 17,
+      "low_malignancy": 20,
+      "medium_risk": 38
+    }
+  },
+  "point_estimate": {
+    "accuracy": 0.84,
+    "macro_f1": 0.8395033689151336,
+    "high_malignancy_f1": 0.8235294117647058,
+    "low_malignancy_f1": 0.8571428571428571,
+    "medium_risk_f1": 0.8378378378378378
+  },
+  "bootstrap": {
+    "n": 2000,
+    "unit": "patient_id",
+    "summary": {
+      "accuracy": {
+        "mean": 0.8403599999999999,
+        "std": 0.04246063101187141,
+        "p025": 0.7466666666666667,
+        "p975": 0.92
+      },
+      "macro_f1": {
+        "mean": 0.8366025904319303,
+        "std": 0.044461884210953234,
+        "p025": 0.7442494518360531,
+        "p975": 0.9188109161793372
+      },
+      "high_malignancy_f1": {
+        "mean": 0.8198410716511224,
+        "std": 0.07557334007379156,
+        "p025": 0.6470113851992411,
+        "p975": 0.9473684210526315
+      },
+      "low_malignancy_f1": {
+        "mean": 0.8539735120677333,
+        "std": 0.061844729797085746,
+        "p025": 0.7142857142857143,
+        "p975": 0.9565217391304348
+      },
+      "medium_risk_f1": {
+        "mean": 0.835993187576935,
+        "std": 0.0473031934527298,
+        "p025": 0.7352450980392158,
+        "p975": 0.918918918918919
+      }
+    }
+  },
+  "repeated_subsample": {
+    "n": 2000,
+    "fraction": 0.8,
+    "unit": "patient_id",
+    "summary": {
+      "accuracy": {
+        "mean": 0.8400666666666666,
+        "std": 0.021223642460176724,
+        "p025": 0.8,
+        "p975": 0.8833333333333333
+      },
+      "macro_f1": {
+        "mean": 0.8386862954671191,
+        "std": 0.022025923165446642,
+        "p025": 0.7975867269984919,
+        "p975": 0.884199254089583
+      },
+      "high_malignancy_f1": {
+        "mean": 0.821882855929201,
+        "std": 0.037682016591577855,
+        "p025": 0.75,
+        "p975": 0.8890804597701139
+      },
+      "low_malignancy_f1": {
+        "mean": 0.8566001964119286,
+        "std": 0.029240282691008496,
+        "p025": 0.8,
+        "p975": 0.9142857142857143
+      },
+      "medium_risk_f1": {
+        "mean": 0.8375758340602277,
+        "std": 0.023623673448431907,
+        "p025": 0.7924528301886793,
+        "p975": 0.8852459016393442
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+﻿image_path,patient_id,label,prob_high,age,sex,smoking_status,tumor_size,family_history,symptom_score,split
+data/processed/images/LIDC-IDRI-0291/6d23564a282b719a.png,LIDC-IDRI-0291,low_malignancy,0.174,51,male,never,14.5,no,2,test
+data/processed/images/LIDC-IDRI-0569/75ae29ffe80820aa.png,LIDC-IDRI-0569,low_malignancy,0.215,59,male,never,11.9,no,3,test
+data/processed/images/LIDC-IDRI-0577/8060a549bf46bcfb.png,LIDC-IDRI-0577,low_malignancy,0.397,55,female,former,12.5,no,3,test
+data/processed/images/LIDC-IDRI-0582/e5c74b4956e25b43.png,LIDC-IDRI-0582,low_malignancy,0.44,46,female,former,13.9,no,5,test
+data/processed/images/LIDC-IDRI-0118/2e83cfdb92867db1.png,LIDC-IDRI-0118,low_malignancy,0.447,60,female,former,16.9,no,2,test
+data/processed/images/LIDC-IDRI-0184/df88dd43499edaf2.png,LIDC-IDRI-0184,low_malignancy,0.498,61,female,current,11.0,no,4,test
+data/processed/images/LIDC-IDRI-0025/c8234b1d4e251b79.png,LIDC-IDRI-0025,low_malignancy,0.5,56,female,current,17.7,yes,3,test
+data/processed/images/LIDC-IDRI-0403/fcf731fa4314b0fb.png,LIDC-IDRI-0403,low_malignancy,0.528,59,female,current,14.2,no,3,test
+data/processed/images/LIDC-IDRI-0195/3c73b06505f06814.png,LIDC-IDRI-0195,high_malignancy,0.447,57,female,former,11.8,no,4,test
+data/processed/images/LIDC-IDRI-0156/58aa72a37bfac38c.png,LIDC-IDRI-0156,high_malignancy,0.628,74,female,current,13.0,yes,5,test
+data/processed/images/LIDC-IDRI-0489/2ea4394ac796d9a0.png,LIDC-IDRI-0489,high_malignancy,0.74,71,male,current,20.5,no,5,test
+data/processed/images/LIDC-IDRI-0095/f5bcf97c5c65e971.png,LIDC-IDRI-0095,high_malignancy,0.852,69,female,never,23.2,no,9,test
+data/processed/images/LIDC-IDRI-0072/799b2947778ef27e.png,LIDC-IDRI-0072,high_malignancy,0.995,62,male,current,43.7,yes,9,test

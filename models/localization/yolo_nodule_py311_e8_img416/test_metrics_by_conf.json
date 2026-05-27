@@ -1,0 +1,56 @@
+[
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.05,
+    "map50": 0.629009380729616,
+    "map50_95": 0.378196758135704,
+    "precision": 0.7007978643705666,
+    "recall": 0.5291943828529194
+  },
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.1,
+    "map50": 0.6461556928292598,
+    "map50_95": 0.396229983152656,
+    "precision": 0.7007978643705666,
+    "recall": 0.5291943828529194
+  },
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.15,
+    "map50": 0.6557315085213287,
+    "map50_95": 0.40961729344755093,
+    "precision": 0.7007978643705666,
+    "recall": 0.5291943828529194
+  },
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.2,
+    "map50": 0.658418479185781,
+    "map50_95": 0.4165332401028728,
+    "precision": 0.6844569288389513,
+    "recall": 0.5402808573540281
+  },
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.25,
+    "map50": 0.660866046214093,
+    "map50_95": 0.4232529836827533,
+    "precision": 0.7453754080522307,
+    "recall": 0.5062823355506282
+  },
+  {
+    "weights": "models\\localization\\yolo_nodule_py311_e8_img416\\weights\\best.pt",
+    "imgsz": 416,
+    "conf": 0.3,
+    "map50": 0.6593375479899837,
+    "map50_95": 0.4262153872753823,
+    "precision": 0.7830303030303031,
+    "recall": 0.47745750184774577
+  }
+]

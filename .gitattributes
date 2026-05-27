@@ -1,0 +1,15 @@
+# Keep source/docs stable across Windows and Linux.
+* text=auto eol=lf
+# Binary assets and model checkpoints must never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.bmp binary
+*.tif binary
+*.tiff binary
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
+*.pkl binary
+*.joblib binary
+*.zip binary

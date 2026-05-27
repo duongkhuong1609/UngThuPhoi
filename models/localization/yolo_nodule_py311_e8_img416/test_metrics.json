@@ -1,0 +1,12 @@
+{
+  "model": "models/localization/yolo_nodule_py311_e3/weights/best.pt",
+  "data": "C:\\Users\\ASUS\\Desktop\\UngThuPhoi\\data\\localization\\yolo_nodule\\dataset.yaml",
+  "epochs": 8,
+  "imgsz": 416,
+  "batch": 6,
+  "device": "cpu",
+  "map50": 0.6004834800881816,
+  "map50_95": 0.34385203060302155,
+  "precision": 0.7007978643705666,
+  "recall": 0.5291943828529194
+}

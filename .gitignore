@@ -1,0 +1,38 @@
+# Python environments and dependency caches
+.venv/
+.venv_yolo/
+.python*/
+.pydeps/
+archive_unused/
+
+# Node/Vite dependencies and generated frontend build
+frontend/node_modules/
+frontend/dist/
+node_modules/
+
+# Runtime/cache folders generated during demo or training
+.tmp/
+.ultralytics_config/
+.matplotlib_config/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.cache
+
+# Logs and local runtime outputs
+*.log
+backend_runtime.err.log
+backend_runtime.out.log
+
+# Local IDE settings
+.vscode/
+
+# Generated zip bundles for Kaggle/local transfer
+*.zip
+
+# OS noise
+Thumbs.db
+Desktop.ini
+.DS_Store

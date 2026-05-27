@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-multipart
+numpy
+pandas
+scikit-learn
+Pillow
+torch
+torchvision
+motor
+pydicom
+ultralytics

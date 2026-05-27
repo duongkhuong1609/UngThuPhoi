@@ -1,0 +1,14 @@
+﻿image_path,preview_image_path,patient_id,label,age,sex,smoking_status,tumor_size,family_history,symptom_score,split
+data/processed/roi_images_3class/LIDC-IDRI-0184/LIDC-IDRI-0184_4268743d0705e877.png,data/processed/images/LIDC-IDRI-0184/df88dd43499edaf2.png,LIDC-IDRI-0184,low_malignancy,58,female,never,16.2,no,2,test
+data/processed/roi_images_3class/LIDC-IDRI-0495/LIDC-IDRI-0495_6f9d3d9d2c142a81.png,data/processed/images/LIDC-IDRI-0495/54fce6472b81065d.png,LIDC-IDRI-0495,low_malignancy,59,female,never,6.1,no,1,test
+data/processed/roi_images_3class/LIDC-IDRI-0569/LIDC-IDRI-0569_75256b6c17ead3c1.png,data/processed/images/LIDC-IDRI-0569/75ae29ffe80820aa.png,LIDC-IDRI-0569,low_malignancy,44,female,former,12.3,no,3,test
+data/processed/roi_images_3class/LIDC-IDRI-0291/LIDC-IDRI-0291_1a777c21244a2a99.png,data/processed/images/LIDC-IDRI-0291/6d23564a282b719a.png,LIDC-IDRI-0291,low_malignancy,51,male,never,14.5,no,2,test
+data/processed/roi_images_3class/LIDC-IDRI-0577/LIDC-IDRI-0577_03f8890d45d06573.png,data/processed/images/LIDC-IDRI-0577/8060a549bf46bcfb.png,LIDC-IDRI-0577,low_malignancy,55,female,former,12.5,no,3,test
+data/processed/roi_images_3class/LIDC-IDRI-0006/LIDC-IDRI-0006_13c878eee016a6a4.png,data/processed/full_preview_3class/LIDC-IDRI-0006.png,LIDC-IDRI-0006,medium_risk,50,male,former,14.1,no,5,test
+data/processed/roi_images_3class/LIDC-IDRI-0334/LIDC-IDRI-0334_c6c51f33a8ea471d.png,data/processed/full_preview_3class/LIDC-IDRI-0334.png,LIDC-IDRI-0334,medium_risk,52,female,never,12.1,yes,4,test
+data/processed/roi_images_3class/LIDC-IDRI-0350/LIDC-IDRI-0350_3c4961435f587954.png,data/processed/full_preview_3class/LIDC-IDRI-0350.png,LIDC-IDRI-0350,medium_risk,62,male,current,21.5,no,6,test
+data/processed/roi_images_3class/LIDC-IDRI-0260/LIDC-IDRI-0260_c0651fb853f63cea.png,data/processed/images/LIDC-IDRI-0260/ac233a0c82fc7d2d.png,LIDC-IDRI-0260,high_malignancy,46,male,current,24.1,yes,9,test
+data/processed/roi_images_3class/LIDC-IDRI-0016/LIDC-IDRI-0016_a1c35b0d8a3ca761.png,data/processed/images/LIDC-IDRI-0016/6dcee80d332394e0.png,LIDC-IDRI-0016,high_malignancy,63,female,current,35.6,no,6,test
+data/processed/roi_images_3class/LIDC-IDRI-0196/LIDC-IDRI-0196_cbff217afc3d3b45.png,data/processed/images/LIDC-IDRI-0196/82a6b0224cc5cbab.png,LIDC-IDRI-0196,high_malignancy,77,female,current,34.0,no,7,test
+data/processed/roi_images_3class/LIDC-IDRI-0515/LIDC-IDRI-0515_faebff156322ca8a.png,data/processed/images/LIDC-IDRI-0515/710c3cf3c3486f2f.png,LIDC-IDRI-0515,high_malignancy,64,female,current,31.9,no,7,test
+data/processed/roi_images_3class/LIDC-IDRI-0195/LIDC-IDRI-0195_11fdabde27c65f3d.png,data/processed/images/LIDC-IDRI-0195/3c73b06505f06814.png,LIDC-IDRI-0195,high_malignancy,57,female,former,11.8,no,4,test
