@@ -1,6 +1,0 @@
-path: C:/Users/ASUS/Desktop/UngThuPhoi/data/localization/yolo_nodule
-train: images/train
-val: images/val
-test: images/test
-names:
-  0: nodule

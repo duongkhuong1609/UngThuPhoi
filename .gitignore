@@ -36,3 +36,8 @@ backend_runtime.out.log
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+data/localization/
+reports/localization/
+frontend/tsconfig.tsbuildinfo
+
