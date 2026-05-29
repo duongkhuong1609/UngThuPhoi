@@ -318,8 +318,20 @@ select {
 }
 
 .panel.home-intro-card,
-.panel.home-card {
+.panel.home-card,
+.panel.home-model-card,
+.panel.home-process-card {
   min-height: 0;
+}
+
+.home-model-card,
+.home-process-card {
+  width: 100%;
+}
+
+.home-model-card {
+  display: grid;
+  gap: 12px;
 }
 
 .panel__header {

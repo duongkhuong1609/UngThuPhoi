@@ -1,40 +1,26 @@
-﻿# System Test Guide
+# System Test Guide
 
-File này dùng để kiểm tra nhanh hệ thống production sau khi dọn project.
+File nay dung de kiem tra nhanh he thong production sau khi da bo MongoDB va lich su du doan.
 
-## 1. Start MongoDB Local
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_mongo_local.ps1
-```
-
-Kỳ vọng:
-
-```text
-MongoDB chạy tại mongodb://127.0.0.1:27017
-```
-
-## 2. Start Backend
+## 1. Start Backend
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\start_backend.ps1
 ```
 
-Backend chạy tại:
+Backend chay tai:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Backend cũng serve luôn giao diện React đã build tại:
+Backend cung serve luon giao dien React da build tai:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-Nên dùng `127.0.0.1` thay vì `localhost` trên Windows để tránh lỗi browser ưu tiên IPv6.
-
-## 3. Start Frontend Dev Tuỳ Chọn
+## 2. Frontend Dev Tuy Chon
 
 ```powershell
 cd frontend
@@ -42,17 +28,13 @@ npm install
 npm.cmd run dev
 ```
 
-Vite dev server chạy tại:
+Vite dev server chay tai:
 
 ```text
 http://127.0.0.1:5173
 ```
 
-Chỉ cần bước này khi phát triển giao diện. Khi demo, có thể bỏ qua và mở trực tiếp `http://127.0.0.1:8000`.
-
-## 4. Test Health
-
-Mở trình duyệt hoặc PowerShell:
+## 3. Test Health
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8000/health
@@ -61,87 +43,70 @@ Invoke-RestMethod http://127.0.0.1:8000/health
 Checklist pass:
 
 ```text
+status = ok
 model_loaded = true
 checkpoint = multimodal_model_3class_distilled_student.pth
 dataset_csv = dataset\multimodal_image_dataset_3class_roi.csv
 yolo_localization_loaded = true
 yolo_checkpoint = models\localization\yolo_nodule_kaggle_m640_e80_fixray2_best.pt
 yolo_conf_threshold = 0.12
-mongo_connected = true
 startup_error = null
 yolo_startup_error = null
 ```
 
-Nếu `mongo_connected = false`, kiểm tra MongoDB local trước. Predict vẫn có thể chạy, nhưng lịch sử dự đoán sẽ không lưu được.
+## 4. Test Predict Tren Giao Dien
 
-## 5. Test Predict Trên Giao Diện
-
-1. Mở giao diện tại `http://127.0.0.1:8000`.
-2. Bấm dùng ảnh mẫu hoặc upload ảnh CT phổi hợp lệ.
-3. Nhập thông tin bệnh nhân bắt buộc.
-4. `tumor_size` có thể nhập hoặc để trống.
-5. Bấm Predict.
+1. Mo giao dien tai `http://127.0.0.1:8000`
+2. Chon anh mau hoac upload anh CT phoi hop le
+3. Nhap thong tin benh nhan
+4. Bam du doan
 
 Checklist pass:
 
-```text
-Ảnh preview hiển thị đúng
-YOLO localization có trạng thái rõ ràng
-Nếu có box, ảnh overlay bounding box hiển thị
-Classification trả nhãn low/medium/high
-Xác suất từng lớp hiển thị hợp lý
-Không có lỗi Failed to fetch
-```
+- ket qua hien thi binh thuong
+- anh vung nghi ngo duoc render neu YOLO phat hien box
+- warning hien dung neu khong co box hoac thieu truong du lieu
 
-## 6. Test YOLO Localization
+## 5. Test API Predict Bang PowerShell
 
-Sau Predict, kiểm tra khu vực localization:
-
-```text
-box_count hiển thị số box phát hiện
-annotated_image hiển thị nếu backend trả overlay
-Nếu box_count = 0, giao diện hiển thị thông báo không phát hiện vùng nghi ngờ rõ ràng
-```
-
-Nếu classification là high nhưng YOLO không có box, hệ thống phải hiển thị cảnh báo bất nhất.
-
-## 7. Test MongoDB History
-
-Sau một lần Predict thành công:
-
-1. Mở bảng lịch sử dự đoán trên frontend.
-2. Kiểm tra bản ghi mới xuất hiện.
-3. Bấm xem chi tiết.
-4. Xóa bản ghi test nếu cần.
-
-API tương ứng:
-
-```text
-GET /predictions
-GET /predictions/{id}
-DELETE /predictions/{id}
+```powershell
+curl.exe -s -X POST http://127.0.0.1:8000/predict `
+  -F "sample_path=data/processed/roi_images_3class/LIDC-IDRI-0184/LIDC-IDRI-0184_4268743d0705e877.png" `
+  -F "localization_sample_path=data/processed/images/LIDC-IDRI-0184/df88dd43499edaf2.png" `
+  -F "patient_name=Smoke Test" `
+  -F "age=58" `
+  -F "sex=female" `
+  -F "smoking_status=never" `
+  -F "tumor_size=16.2" `
+  -F "family_history=no" `
+  -F "symptom_score=2"
 ```
 
 Checklist pass:
 
-```text
-Danh sách history tải được
-Chi tiết history tải được
-Xóa history hoạt động
-Không báo Failed to fetch
+- response co `risk_level`
+- response co `probabilities`
+- response co `localization`
+- response co `input_summary`
+
+## 6. Test Frontend Build
+
+```powershell
+cd frontend
+npm.cmd run build
 ```
 
-## Checklist Cuối
+Checklist pass:
 
-```text
-[ ] MongoDB local chạy
-[ ] Backend /health pass
-[ ] Frontend gọi đúng http://127.0.0.1:8000
-[ ] Ảnh mẫu preview được
-[ ] Upload ảnh CT phổi preview được
-[ ] Predict trả kết quả classification
-[ ] YOLO localization trả trạng thái/box/overlay
-[ ] History MongoDB lưu được
-[ ] Xem chi tiết history được
-[ ] Xóa history được
-```
+- build thanh cong
+- tao ra `frontend/dist`
+
+## 7. Test Docker Space Readiness
+
+Checklist:
+
+- co `Dockerfile` o root project
+- co `.dockerignore`
+- `README.md` co YAML metadata voi `sdk: docker`
+- frontend production mac dinh same-origin API
+- khong con API lich su du doan va khong con MongoDB local

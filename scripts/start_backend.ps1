@@ -52,7 +52,7 @@ function Ensure-Pip {
 function Test-BackendDeps {
     param([string]$PythonExe)
     try {
-        & $PythonExe -c "import fastapi, uvicorn, torch, torchvision, pandas, PIL, motor, pymongo, ultralytics" *> $null
+        & $PythonExe -c "import fastapi, uvicorn, torch, torchvision, pandas, PIL, ultralytics, pydicom, sklearn" *> $null
         return ($LASTEXITCODE -eq 0)
     } catch {
         return $false
@@ -154,24 +154,13 @@ try {
     $pyDepsReady = (Test-Path -LiteralPath ".pydeps\\fastapi") `
         -and (Test-Path -LiteralPath ".pydeps\\uvicorn") `
         -and (Test-Path -LiteralPath ".pydeps\\torch") `
-        -and (Test-Path -LiteralPath ".pydeps\\motor") `
-        -and (Test-Path -LiteralPath ".pydeps\\pymongo")
+        -and (Test-Path -LiteralPath ".pydeps\\ultralytics")
     if (-not $pyDepsReady) {
         Invoke-Checked -Exe $systemPython.exe -CmdArgs ($systemPython.args + @("-m", "pip", "install", "-r", "requirements-react-demo.txt", "--target", ".pydeps")) -ErrorMessage "Cai dependency vao .pydeps that bai."
     }
     $env:PYTHONPATH = "$projectRoot\.pydeps;$projectRoot"
     $runPythonExe = $systemPython.exe
     $runPythonArgs = $systemPython.args
-}
-
-if (-not $env:MONGO_URI) {
-    $env:MONGO_URI = "mongodb://127.0.0.1:27017"
-}
-if (-not $env:MONGO_DB_NAME) {
-    $env:MONGO_DB_NAME = "ungthuphoi_demo"
-}
-if (-not $env:MONGO_COLLECTION_NAME) {
-    $env:MONGO_COLLECTION_NAME = "prediction_history"
 }
 if (-not $env:SERVE_FRONTEND) {
     $env:SERVE_FRONTEND = "1"

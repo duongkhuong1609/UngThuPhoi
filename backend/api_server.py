@@ -18,9 +18,6 @@ import torch.nn as nn
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from bson import ObjectId
-from bson.errors import InvalidId
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from torchvision import transforms
@@ -149,12 +146,6 @@ CLASS_NAMES_BY_INDEX: list[str] = CLASS_NAMES_DEFAULT.copy()
 STARTUP_ERROR: str | None = None
 MODEL_CHECKPOINT_NAME: str = "unknown"
 NUMERIC_DEFAULTS: dict[str, float] = {}
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017").strip()
-MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "ungthuphoi_demo").strip() or "ungthuphoi_demo"
-MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME", "prediction_history").strip() or "prediction_history"
-MONGO_CLIENT: AsyncIOMotorClient | None = None
-MONGO_COLLECTION: AsyncIOMotorCollection | None = None
-MONGO_STARTUP_ERROR: str | None = None
 YOLO_MODEL_PATH_RAW = os.getenv(
     "YOLO_MODEL_PATH",
     str(PROJECT_ROOT / "models" / "localization" / "yolo_nodule_kaggle_m640_e80_fixray2_best.pt"),
@@ -582,46 +573,6 @@ def load_predictor_assets() -> None:
     YOLO_MODEL = load_yolo_model()
 
 
-async def init_mongo() -> None:
-    global MONGO_CLIENT, MONGO_COLLECTION, MONGO_STARTUP_ERROR
-    try:
-        client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=2500)
-        await client.admin.command("ping")
-        collection = client[MONGO_DB_NAME][MONGO_COLLECTION_NAME]
-        await collection.create_index("timestamp")
-        await collection.create_index("patient_id")
-        await collection.create_index("patient_name")
-        MONGO_CLIENT = client
-        MONGO_COLLECTION = collection
-        MONGO_STARTUP_ERROR = None
-    except Exception as exc:
-        MONGO_CLIENT = None
-        MONGO_COLLECTION = None
-        MONGO_STARTUP_ERROR = f"{type(exc).__name__}: {exc}"
-
-
-def ensure_mongo_collection() -> AsyncIOMotorCollection:
-    if MONGO_COLLECTION is None:
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "message": "MongoDB is not available",
-                "issues": [MONGO_STARTUP_ERROR or "MongoDB connection not initialized"],
-            },
-        )
-    return MONGO_COLLECTION
-
-
-def serialize_prediction_doc(doc: dict[str, Any]) -> dict[str, Any]:
-    out = dict(doc)
-    raw_id = out.pop("_id", None)
-    out["id"] = str(raw_id) if raw_id is not None else ""
-    ts = out.get("timestamp")
-    if isinstance(ts, datetime):
-        out["timestamp"] = ts.astimezone(timezone.utc).isoformat()
-    return out
-
-
 def build_record_id() -> str:
     now = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     suffix = uuid4().hex[:6].upper()
@@ -637,7 +588,6 @@ async def _startup() -> None:
     except Exception as exc:
         MODEL = None
         STARTUP_ERROR = f"{type(exc).__name__}: {exc}"
-    await init_mongo()
 
 
 @app.get("/")
@@ -655,7 +605,7 @@ def root() -> dict[str, Any]:
 
 @app.get("/health")
 def health() -> dict[str, Any]:
-    status = "ok" if STARTUP_ERROR is None and MONGO_STARTUP_ERROR is None else "degraded"
+    status = "ok" if STARTUP_ERROR is None else "degraded"
     return {
         "status": status,
         "model_loaded": MODEL is not None,
@@ -664,10 +614,6 @@ def health() -> dict[str, Any]:
         "class_names_by_index": CLASS_NAMES_BY_INDEX,
         "dataset_csv": str(MODEL_DATASET_CSV.relative_to(PROJECT_ROOT)),
         "startup_error": STARTUP_ERROR,
-        "mongo_connected": MONGO_COLLECTION is not None,
-        "mongo_db": MONGO_DB_NAME,
-        "mongo_collection": MONGO_COLLECTION_NAME,
-        "mongo_startup_error": MONGO_STARTUP_ERROR,
         "yolo_localization_loaded": YOLO_MODEL is not None,
         "yolo_checkpoint": str(YOLO_MODEL_PATH.relative_to(PROJECT_ROOT)) if YOLO_MODEL_PATH.exists() else str(YOLO_MODEL_PATH),
         "yolo_conf_threshold": YOLO_CONF_THRESHOLD,
@@ -829,59 +775,6 @@ async def predict(
 
     normalized_patient_name = patient_name.strip() or "Chưa cung c?p"
     normalized_patient_id = patient_id.strip() or build_record_id()
-    source = "sample" if resolved_sample_path else "upload"
-    image_path_or_name = resolved_sample_path or upload_filename or "unknown_image"
-    now_utc = datetime.now(timezone.utc)
-
-    history_doc = {
-        "patient_name": normalized_patient_name,
-        "patient_id": normalized_patient_id,
-        "age": age,
-        "sex": sex,
-        "smoking_status": smoking_status,
-        "tumor_size": tumor_size,
-        "tumor_size_effective": tabular_meta["features"]["tumor_size"],
-        "tumor_size_imputed": "tumor_size" in tabular_meta.get("imputed", {}),
-        "tumor_size_missing": "tumor_size" in tabular_meta.get("missing_fields", []),
-        "tumor_size_missing_encoded": "tumor_size" in tabular_meta.get("missing_encoded", {}),
-        "family_history": family_history,
-        "symptom_score": symptom_score,
-        "image_path": image_path_or_name,
-        "source": source,
-        "predicted_label": pred_label,
-        "predicted_class_index": pred_idx,
-        "probabilities": {
-            "low_malignancy": low_p,
-            "medium_risk": med_p,
-            "high_malignancy": high_p,
-        },
-        "confidence": float(np.max(probs)),
-        "temperature": TEMPERATURE,
-        "checkpoint": MODEL_CHECKPOINT_NAME,
-        "sample_path": resolved_sample_path,
-        "upload_filename": upload_filename,
-        "debug": debug_payload,
-        "tabular_preprocessing": tabular_meta,
-        "localization": {
-            "source": localization_source,
-            "sample_path": resolved_localization_sample_path,
-            # Keep the YOLO overlay in history so the frontend can show the exact
-            # image that was localized during this prediction after a page reload.
-            "result": localization_result,
-        },
-        "timestamp": now_utc,
-    }
-
-    history_id: str | None = None
-    try:
-        collection = ensure_mongo_collection()
-        insert_result = await collection.insert_one(history_doc)
-        history_id = str(insert_result.inserted_id)
-    except HTTPException:
-        warnings.append("History save unavailable.")
-    except Exception as exc:
-        warnings.append("History save failed.")
-        print(f"[HISTORY SAVE ERROR] {type(exc).__name__}: {exc}")
 
     return {
         "risk_level": pred_label,
@@ -899,7 +792,6 @@ async def predict(
         "warnings": warnings,
         "temperature": TEMPERATURE,
         "checkpoint": MODEL_CHECKPOINT_NAME,
-        "history_id": history_id,
         "input_summary": {
             "patient_name": normalized_patient_name,
             "patient_id": normalized_patient_id,
@@ -931,50 +823,6 @@ async def predict(
             ),
         },
     }
-
-
-@app.get("/predictions")
-async def list_predictions(
-    limit: int = Query(default=50, ge=1, le=500),
-    skip: int = Query(default=0, ge=0),
-):
-    collection = ensure_mongo_collection()
-    cursor = collection.find({}, sort=[("timestamp", -1)]).skip(skip).limit(limit)
-    rows = await cursor.to_list(length=limit)
-    return {
-        "items": [serialize_prediction_doc(row) for row in rows],
-        "count": len(rows),
-        "skip": skip,
-        "limit": limit,
-    }
-
-
-@app.get("/predictions/{prediction_id}")
-async def get_prediction_detail(prediction_id: str):
-    collection = ensure_mongo_collection()
-    try:
-        oid = ObjectId(prediction_id)
-    except (InvalidId, ValueError):
-        raise HTTPException(status_code=400, detail={"message": "Invalid prediction id"})
-
-    row = await collection.find_one({"_id": oid})
-    if not row:
-        raise HTTPException(status_code=404, detail={"message": "Prediction history not found"})
-    return serialize_prediction_doc(row)
-
-
-@app.delete("/predictions/{prediction_id}")
-async def delete_prediction(prediction_id: str):
-    collection = ensure_mongo_collection()
-    try:
-        oid = ObjectId(prediction_id)
-    except (InvalidId, ValueError):
-        raise HTTPException(status_code=400, detail={"message": "Invalid prediction id"})
-
-    result = await collection.delete_one({"_id": oid})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail={"message": "Prediction history not found"})
-    return {"deleted": True, "id": prediction_id}
 
 
 @app.get("/{full_path:path}", include_in_schema=False)

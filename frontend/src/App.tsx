@@ -1,12 +1,11 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnalyticsPanel } from './components/AnalyticsPanel';
+﻿import { useEffect, useRef, useState } from 'react';
 import { HomePanel } from './components/HomePanel';
-import { HistoryPanel } from './components/HistoryPanel';
 import { InputPanel } from './components/InputPanel';
+import { ModelPanel } from './components/ModelPanel';
 import { ResultPanel } from './components/ResultPanel';
 import { Sidebar } from './components/Sidebar';
-import { API_BASE, API_URL, HEALTH_URL, HISTORY_URL, apiFetch, apiPayloadMessage, parseJsonOrText, toApiErrorMessage } from './api';
-import type { FormState, PredictionHistoryRecord, PredictionResponse, ValidationErrors } from './types';
+import { API_BASE, API_URL, HEALTH_URL, apiFetch, apiPayloadMessage, parseJsonOrText, toApiErrorMessage } from './api';
+import type { FormState, PredictionResponse, ValidationErrors } from './types';
 
 const CT_WARNING_BASE = 'Đây không phải ảnh CT phổi phù hợp cho mô hình. Vui lòng tải đúng ảnh CT phổi.';
 
@@ -26,7 +25,7 @@ type UploadCheckResult = {
   warnings: string[];
 };
 
-type ViewKey = 'home' | 'predict' | 'history';
+type ViewKey = 'home' | 'model' | 'predict';
 
 const FIRST_NAMES = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Vũ', 'Phan', 'Đặng', 'Bùi', 'Đỗ'];
 const MIDDLE_NAMES = ['Văn', 'Thị', 'Minh', 'Hữu', 'Ngọc', 'Gia', 'Khánh', 'Anh', 'Quang', 'Thanh'];
@@ -331,6 +330,15 @@ const initialForm: FormState = {
   symptom_score: '',
 };
 
+const emptyImageInfo: ImageInfo = {
+  previewUrl: null,
+  source: 'none',
+  mimeType: null,
+  width: null,
+  height: null,
+  isValid: false,
+};
+
 function validate(form: FormState): ValidationErrors {
   const errors: ValidationErrors = {};
 
@@ -365,10 +373,6 @@ export default function App() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [sampleLoaded, setSampleLoaded] = useState(false);
-  const [historyItems, setHistoryItems] = useState<PredictionHistoryRecord[]>([]);
-  const [historySelected, setHistorySelected] = useState<PredictionHistoryRecord | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(false);
-  const [historyError, setHistoryError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ViewKey>('home');
   const [imageInfo, setImageInfo] = useState<ImageInfo>({
     previewUrl: null,
@@ -378,6 +382,7 @@ export default function App() {
     height: null,
     isValid: false,
   });
+  const [submittedImageInfo, setSubmittedImageInfo] = useState<ImageInfo | null>(null);
   const lastObjectUrl = useRef<string | null>(null);
 
   const onChange = (patch: Partial<FormState>) => {
@@ -644,7 +649,8 @@ export default function App() {
       }
 
       setResult(payload as PredictionResponse);
-      await fetchHistory();
+      setSubmittedImageInfo({ ...imageInfo });
+      resetPredictForm({ keepResult: true, keepSubmittedImageInfo: true });
     } catch (fetchError) {
       setError(toApiErrorMessage(fetchError, 'Predict thất bại.'));
     } finally {
@@ -652,104 +658,65 @@ export default function App() {
     }
   };
 
-  const onReset = () => {
+  const clearLastObjectUrl = () => {
     if (lastObjectUrl.current && lastObjectUrl.current.startsWith('blob:')) {
       try { URL.revokeObjectURL(lastObjectUrl.current); } catch {}
     }
     lastObjectUrl.current = null;
+  };
+
+  const resetPredictForm = ({
+    keepResult = false,
+    keepSubmittedImageInfo = false,
+  }: {
+    keepResult?: boolean;
+    keepSubmittedImageInfo?: boolean;
+  } = {}) => {
+    clearLastObjectUrl();
     setForm(initialForm);
-    setResult(null);
     setError(null);
     setValidationErrors({});
     setSampleLoaded(false);
-    setImageInfo({ previewUrl: null, source: 'none', mimeType: null, width: null, height: null, isValid: false });
-  };
-
-  const fetchHistory = async () => {
-    setHistoryLoading(true);
-    setHistoryError(null);
-    try {
-      const response = await apiFetch(`${HISTORY_URL}?limit=100`, {}, 20000);
-      const payload = await parseJsonOrText(response);
-      if (!response.ok) {
-        throw new Error(apiPayloadMessage(payload, 'Không tải được lịch sử dự đoán.'));
-      }
-      const items = (payload?.items ?? []) as PredictionHistoryRecord[];
-      setHistoryItems(items);
-      if (historySelected) {
-        const keep = items.find((x) => x.id === historySelected.id) ?? null;
-        setHistorySelected(keep);
-      }
-    } catch (e) {
-      setHistoryError(toApiErrorMessage(e, 'Không tải được lịch sử dự đoán.'));
-    } finally {
-      setHistoryLoading(false);
+    setImageInfo(emptyImageInfo);
+    if (!keepResult) {
+      setResult(null);
+    }
+    if (!keepSubmittedImageInfo) {
+      setSubmittedImageInfo(null);
     }
   };
 
-  const onSelectHistory = async (id: string) => {
-    setHistoryError(null);
-    try {
-      const response = await apiFetch(`${HISTORY_URL}/${id}`, {}, 20000);
-      const payload = await parseJsonOrText(response);
-      if (!response.ok) {
-        throw new Error(apiPayloadMessage(payload, 'Không tải được chi tiết lịch sử.'));
-      }
-      setHistorySelected(payload as PredictionHistoryRecord);
-    } catch (e) {
-      setHistoryError(toApiErrorMessage(e, 'Không tải được chi tiết lịch sử.'));
-    }
-  };
-
-  const onDeleteHistory = async (id: string) => {
-    setHistoryError(null);
-    try {
-      const response = await apiFetch(`${HISTORY_URL}/${id}`, { method: 'DELETE' }, 20000);
-      const payload = await parseJsonOrText(response);
-      if (!response.ok) {
-        throw new Error(apiPayloadMessage(payload, 'Không xoá được bản ghi lịch sử.'));
-      }
-      if (historySelected?.id === id) {
-        setHistorySelected(null);
-      }
-      await fetchHistory();
-    } catch (e) {
-      setHistoryError(toApiErrorMessage(e, 'Không xoá được bản ghi lịch sử.'));
-    }
+  const onReset = () => {
+    resetPredictForm();
   };
 
   useEffect(() => {
-    void fetchHistory();
+    resetPredictForm();
   }, []);
 
   const onNavigate = (view: ViewKey) => {
+    resetPredictForm();
     setActiveView(view);
-    if (view === 'history') {
-      void fetchHistory();
-    }
   };
 
   return (
     <div className="dashboard-shell">
-      <Sidebar activeView={activeView} historyCount={historyItems.length} onNavigate={onNavigate} />
+      <Sidebar activeView={activeView} onNavigate={onNavigate} />
 
       <div className="app-shell">
-        <header className="hero">
-          <div>
-            <h1>
-              {activeView === 'home'
-                ? 'Trang chủ hệ thống'
-                : activeView === 'predict'
-                  ? 'Dự đoán nguy cơ ác tính phổi'
-                  : 'Lịch sử dự đoán'}
-            </h1>
-          </div>
-          <div className="hero__badge">Chỉ dành nghiên cứu</div>
-        </header>
+        {activeView === 'predict' && (
+          <header className="hero">
+            <div>
+              <h1>Dự đoán nguy cơ ác tính phổi</h1>
+            </div>
+          </header>
+        )}
 
         {activeView === 'home' ? (
           <HomePanel />
-        ) : activeView === 'predict' ? (
+        ) : activeView === 'model' ? (
+          <ModelPanel />
+        ) : (
           <>
             <main className="layout layout--merged">
               <InputPanel
@@ -766,25 +733,20 @@ export default function App() {
                 onRandomizeParams={onRandomizeParams}
               />
 
-              <ResultPanel loading={loading} error={error} result={result} form={form} imageInfo={imageInfo} />
+              <ResultPanel
+                loading={loading}
+                error={error}
+                result={result}
+                form={form}
+                imageInfo={result ? (submittedImageInfo ?? imageInfo) : imageInfo}
+              />
             </main>
           </>
-        ) : (
-          <main className="history-page">
-            <HistoryPanel
-              items={historyItems}
-              selected={historySelected}
-              loading={historyLoading}
-              error={historyError}
-        onRefresh={fetchHistory}
-        onSelect={onSelectHistory}
-        onCollapse={() => setHistorySelected(null)}
-        onDelete={onDeleteHistory}
-      />
-          </main>
         )}
       </div>
     </div>
   );
 }
+
+
 

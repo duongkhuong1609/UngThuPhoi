@@ -28,7 +28,6 @@ export type PredictionResponse = {
   warnings?: string[];
   temperature: number;
   checkpoint: string;
-  history_id?: string | null;
   debug?: {
     sample_path_requested?: string | null;
     sample_path_resolved?: string | null;
@@ -96,45 +95,4 @@ export type PredictionResponse = {
 
 export type ValidationErrors = Partial<Record<keyof Omit<FormState, 'imagePreview' | 'sample_path' | 'localization_sample_path'>, string>> & {
   image?: string;
-};
-
-export type PredictionHistoryRecord = {
-  id: string;
-  patient_name: string;
-  patient_id: string;
-  age: string;
-  sex: string;
-  smoking_status: string;
-  tumor_size: string;
-  tumor_size_effective?: string | number | null;
-  tumor_size_imputed?: boolean;
-  tumor_size_missing?: boolean;
-  tumor_size_missing_encoded?: boolean;
-  family_history: string;
-  symptom_score: string;
-  image_path: string;
-  source: 'sample' | 'upload' | string;
-  predicted_label: 'high_malignancy' | 'medium_risk' | 'low_malignancy' | string;
-  predicted_class_index: number;
-  probabilities: {
-    low_malignancy: number;
-    medium_risk: number;
-    high_malignancy: number;
-  };
-  confidence: number;
-  temperature: number;
-  checkpoint: string;
-  timestamp: string;
-  sample_path?: string | null;
-  upload_filename?: string | null;
-  localization?: {
-    source?: string | null;
-    sample_path?: string | null;
-    result?: {
-      available?: boolean;
-      error?: string | null;
-      box_count?: number;
-      annotated_image?: string | null;
-    };
-  };
 };

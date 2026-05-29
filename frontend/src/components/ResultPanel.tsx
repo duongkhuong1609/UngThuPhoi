@@ -70,15 +70,21 @@ export function ResultPanel({ loading, error, result, form, imageInfo }: Props) 
       })
     : null;
 
+  const displayAge = result?.input_summary?.age ?? form.age;
+  const displaySex = result?.input_summary?.sex ?? form.sex;
+  const displaySmoking = result?.input_summary?.smoking_status ?? form.smoking_status;
+  const displayFamilyHistory = result?.input_summary?.family_history ?? form.family_history;
+  const displaySymptomScore = result?.input_summary?.symptom_score ?? form.symptom_score;
   const imageType =
     imageInfo.mimeType ?? (imageInfo.previewUrl?.toLowerCase().endsWith('.png') ? 'image/png' : 'Không xác định');
   const imageSize = imageInfo.width && imageInfo.height ? `${imageInfo.width} x ${imageInfo.height}` : 'Chưa xác định';
+  const displayTumorSize = result?.input_summary?.tumor_size ?? form.tumor_size;
   const tumorSizeText = result?.input_summary?.tumor_size_missing
     ? 'Chưa nhập'
     : result?.input_summary?.tumor_size_imputed
       ? 'Giá trị chưa hợp lệ, hệ thống đã dùng giá trị thay thế an toàn'
-      : form.tumor_size
-        ? `${form.tumor_size} mm`
+      : displayTumorSize
+        ? `${displayTumorSize} mm`
         : 'Chưa nhập';
   const yoloSummary = result?.localization
     ? `Khoanh vùng nghi ngờ: phát hiện ${result.localization.box_count} vùng nghi ngờ.`
@@ -168,7 +174,7 @@ export function ResultPanel({ loading, error, result, form, imageInfo }: Props) 
 
             {result.localization?.available && result.localization.box_count === 0 && (
               <p className="localization-note">
-                YOLO chưa thấy vùng nghi ngờ vượt ngưỡng hiện tại. Hệ thống vẫn tiếp tục đọc ảnh và thông tin bệnh nhân để đưa ra kết quả.
+                Hệ thống chưa phát hiện vùng nghi ngờ vượt ngưỡng hiện tại. Hệ thống vẫn tiếp tục đọc ảnh và thông tin bệnh nhân để đưa ra kết quả.
               </p>
             )}
             {result.localization_classification_consistency?.no_box_high_risk && (
@@ -184,18 +190,18 @@ export function ResultPanel({ loading, error, result, form, imageInfo }: Props) 
             <div className="patient-groups">
               <div className="patient-group">
                 <p className="patient-group__title">Thông tin cơ bản</p>
-                <div className="patient-item"><span>Tuổi</span><strong>{form.age}</strong></div>
-                <div className="patient-item"><span>Giới tính</span><strong>{readableSex(form.sex)}</strong></div>
+                <div className="patient-item"><span>Tuổi</span><strong>{displayAge}</strong></div>
+                <div className="patient-item"><span>Giới tính</span><strong>{readableSex(displaySex)}</strong></div>
               </div>
               <div className="patient-group">
                 <p className="patient-group__title">Yếu tố liên quan</p>
-                <div className="patient-item"><span>Hút thuốc</span><strong>{readableSmoking(form.smoking_status)}</strong></div>
-                <div className="patient-item"><span>Tiền sử gia đình</span><strong>{readableFamily(form.family_history)}</strong></div>
+                <div className="patient-item"><span>Hút thuốc</span><strong>{readableSmoking(displaySmoking)}</strong></div>
+                <div className="patient-item"><span>Tiền sử gia đình</span><strong>{readableFamily(displayFamilyHistory)}</strong></div>
                 <div className="patient-item"><span>Kích thước nốt ác tính</span><strong>{tumorSizeText}</strong></div>
               </div>
               <div className="patient-group">
                 <p className="patient-group__title">Triệu chứng</p>
-                <div className="patient-item"><span>Điểm triệu chứng</span><strong>{form.symptom_score}/10</strong></div>
+                <div className="patient-item"><span>Điểm triệu chứng</span><strong>{displaySymptomScore}/10</strong></div>
               </div>
             </div>
           </div>
